@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "computedHash": "2cc9bf0201da1fbf1eb7a68a757536ee612f460b0a3401f034bbe30910b4a278"
+    }
+  }
+}

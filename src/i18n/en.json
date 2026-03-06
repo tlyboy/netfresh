@@ -1,0 +1,58 @@
+{
+  "app": {
+    "title": "NetFresh"
+  },
+  "stats": {
+    "total": "Total",
+    "active": "Active",
+    "stale": "Stale",
+    "custom": "Custom"
+  },
+  "status": {
+    "active": "Active",
+    "stale": "Stale",
+    "offline": "Offline"
+  },
+  "category": {
+    "public": "Public",
+    "private": "Private",
+    "domain": "Domain",
+    "unknown": "Unknown"
+  },
+  "table": {
+    "name": "Name",
+    "status": "Status",
+    "category": "Category",
+    "adapter": "Adapter",
+    "ip": "IP Address",
+    "empty": "No network profiles found"
+  },
+  "action": {
+    "cleanup": "Cleanup + Renumber",
+    "confirmTitle": "Confirm cleanup and renumber?",
+    "confirmDesc": "This will delete {count} stale profiles and renumber active networks sequentially.",
+    "confirmBackup": "Registry will be backed up automatically before changes.",
+    "execute": "Execute",
+    "cancel": "Cancel",
+    "staleFound": "{count} stale profiles found"
+  },
+  "toast": {
+    "loadError": "Load failed: {error}",
+    "backupSuccess": "Backup saved",
+    "backupError": "Backup failed: {error}",
+    "cleanupDeleted": "Cleaned {count} stale profiles",
+    "cleanupRenamed": "Renumbered: {renames}",
+    "cleanupOptimal": "Already optimal, no cleanup needed",
+    "cleanupError": "Operation failed: {error}",
+    "renameSuccess": "Renamed: {from} → {to}",
+    "renameError": "Rename failed: {error}",
+    "deleteSuccess": "Deleted: {name}",
+    "deleteError": "Delete failed: {error}"
+  },
+  "delete": {
+    "title": "Delete profile?",
+    "desc": "This will delete network profile \"{name}\" and its associated signatures. This action cannot be undone.",
+    "confirm": "Delete",
+    "cancel": "Cancel"
+  }
+}
