@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
+  ArrowUpCircle,
   Check,
   Download,
   Loader2,
@@ -23,6 +24,11 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import {
   Table,
   TableBody,
   TableCell,
@@ -44,14 +50,26 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
+
+import {
   listProfiles,
   cleanupAndRenumber,
   renameProfile,
   deleteProfile,
   backupProfiles,
+  listBackups,
+  restoreBackup,
+  deleteBackup,
 } from '@/lib/commands'
 import { useTranslations } from '@/i18n'
-import type { NetworkProfile } from '@/lib/types'
+import type { BackupEntry, NetworkProfile } from '@/lib/types'
 
 const categoryKeys: Record<number, string> = {
   0: 'category.public',
@@ -139,6 +157,31 @@ function App() {
     'idle' | 'checking' | 'downloading' | 'ready' | 'latest' | 'error'
   >('idle')
   const [updateVersion, setUpdateVersion] = useState('')
+  const [backups, setBackups] = useState<BackupEntry[]>([])
+  const [backupOpen, setBackupOpen] = useState(false)
+  const [restoring, setRestoring] = useState<string | null>(null)
+
+  const refreshBackups = async () => {
+    try {
+      setBackups(await listBackups())
+    } catch (e) {
+      console.error('Failed to list backups:', e)
+    }
+  }
+
+  const handleRestore = async (entry: BackupEntry) => {
+    setRestoring(entry.path)
+    try {
+      await restoreBackup(entry.path)
+      toast.success(t('backup.restoreSuccess', { name: entry.created_at }))
+      setBackupOpen(false)
+      refresh()
+    } catch (e) {
+      toast.error(t('backup.restoreError', { error: String(e) }))
+    } finally {
+      setRestoring(null)
+    }
+  }
 
   const handleCheckUpdate = async () => {
     setUpdateStatus('checking')
@@ -241,70 +284,243 @@ function App() {
               {t('version', { version: __APP_VERSION__ })}
             </span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8 cursor-pointer"
-              onClick={refresh}
-              disabled={loading}
+          <div className="flex items-center gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8 cursor-pointer"
+                  onClick={refresh}
+                  disabled={loading}
+                >
+                  <RefreshCw
+                    className={`size-4 ${loading ? 'animate-spin' : ''}`}
+                  />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{t('tooltip.refresh')}</TooltipContent>
+            </Tooltip>
+            <Sheet
+              open={backupOpen}
+              onOpenChange={(open) => {
+                setBackupOpen(open)
+                if (open) refreshBackups()
+              }}
             >
-              <RefreshCw
-                className={`size-4 ${loading ? 'animate-spin' : ''}`}
-              />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8 cursor-pointer"
-              onClick={handleBackup}
-            >
-              <Save className="size-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size={
-                updateStatus === 'idle' || updateStatus === 'error'
-                  ? 'icon'
-                  : 'sm'
-              }
-              className={`h-8 cursor-pointer ${updateStatus === 'idle' || updateStatus === 'error' ? 'size-8' : ''}`}
-              onClick={
-                updateStatus === 'ready'
-                  ? () => location.reload()
-                  : handleCheckUpdate
-              }
-              disabled={
-                updateStatus === 'checking' || updateStatus === 'downloading'
-              }
-            >
-              {updateStatus === 'checking' && (
-                <>
-                  <RefreshCw className="size-4 animate-spin" />
-                  {t('update.checking')}
-                </>
-              )}
-              {updateStatus === 'downloading' && (
-                <>
-                  <Download className="size-4 animate-bounce" />
-                  {t('update.downloading', { version: updateVersion })}
-                </>
-              )}
-              {updateStatus === 'ready' && (
-                <>
-                  <RefreshCw className="size-4" />
-                  {t('update.restartToUpdate')}
-                </>
-              )}
-              {updateStatus === 'latest' && (
-                <>
-                  <Check className="size-4" />
-                  {t('update.upToDate')}
-                </>
-              )}
-              {updateStatus === 'error' && <Download className="size-4" />}
-              {updateStatus === 'idle' && <Download className="size-4" />}
-            </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-8 cursor-pointer"
+                    >
+                      <Save className="size-4" />
+                    </Button>
+                  </SheetTrigger>
+                </TooltipTrigger>
+                <TooltipContent>{t('tooltip.backup')}</TooltipContent>
+              </Tooltip>
+              <SheetContent className="flex flex-col gap-0">
+                <SheetHeader className="px-6 pb-4">
+                  <SheetTitle>{t('backup.title')}</SheetTitle>
+                  <SheetDescription>
+                    {t('backup.description')}
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="border-b px-6 pb-4">
+                  <Button
+                    className="w-full cursor-pointer"
+                    onClick={async () => {
+                      await handleBackup()
+                      refreshBackups()
+                    }}
+                  >
+                    <Save className="size-4" />
+                    {t('backup.createNew')}
+                  </Button>
+                </div>
+                <ScrollArea className="flex-1 px-6">
+                  <div className="divide-border divide-y">
+                    {backups.map((entry) => (
+                      <div key={entry.path} className="py-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-muted-foreground text-xs">
+                              {entry.created_at}
+                            </p>
+                            {entry.profile_names.length > 0 ? (
+                              <p className="mt-0.5 text-sm">
+                                {entry.profile_names.join(', ')}
+                              </p>
+                            ) : (
+                              <p className="text-muted-foreground mt-0.5 text-sm italic">
+                                {t('backup.noMeta')}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex shrink-0 items-center gap-1">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="size-7 cursor-pointer"
+                                      disabled={restoring !== null}
+                                    >
+                                      {restoring === entry.path ? (
+                                        <Loader2 className="size-3.5 animate-spin" />
+                                      ) : (
+                                        <RefreshCw className="size-3.5" />
+                                      )}
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>
+                                        {t('backup.confirmTitle')}
+                                      </AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        {t('backup.confirmDesc', {
+                                          name: entry.created_at,
+                                        })}
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel className="cursor-pointer">
+                                        {t('action.cancel')}
+                                      </AlertDialogCancel>
+                                      <AlertDialogAction
+                                        className="cursor-pointer"
+                                        onClick={() => handleRestore(entry)}
+                                      >
+                                        {t('backup.restore')}
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {t('backup.restore')}
+                              </TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="text-muted-foreground hover:text-destructive size-7 cursor-pointer"
+                                    >
+                                      <Trash2 className="size-3.5" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>
+                                        {t('backup.deleteTitle')}
+                                      </AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        {t('backup.deleteDesc', {
+                                          name: entry.created_at,
+                                        })}
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel className="cursor-pointer">
+                                        {t('action.cancel')}
+                                      </AlertDialogCancel>
+                                      <AlertDialogAction
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90 cursor-pointer"
+                                        onClick={async () => {
+                                          try {
+                                            await deleteBackup(entry.path)
+                                            toast.success(
+                                              t('backup.deleteSuccess', {
+                                                name: entry.created_at,
+                                              }),
+                                            )
+                                            refreshBackups()
+                                          } catch (e) {
+                                            toast.error(
+                                              t('backup.deleteError', {
+                                                error: String(e),
+                                              }),
+                                            )
+                                          }
+                                        }}
+                                      >
+                                        {t('delete.confirm')}
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {t('delete.confirm')}
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {backups.length === 0 && (
+                      <div className="text-muted-foreground flex flex-col items-center gap-2 py-12 text-sm">
+                        <Save className="size-8 opacity-20" />
+                        {t('backup.empty')}
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+              </SheetContent>
+            </Sheet>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8 cursor-pointer"
+                  onClick={
+                    updateStatus === 'ready'
+                      ? () => location.reload()
+                      : handleCheckUpdate
+                  }
+                  disabled={
+                    updateStatus === 'checking' ||
+                    updateStatus === 'downloading'
+                  }
+                >
+                  {updateStatus === 'checking' && (
+                    <RefreshCw className="size-4 animate-spin" />
+                  )}
+                  {updateStatus === 'downloading' && (
+                    <Download className="size-4 animate-bounce" />
+                  )}
+                  {updateStatus === 'ready' && (
+                    <ArrowUpCircle className="text-green-500 size-4" />
+                  )}
+                  {updateStatus === 'latest' && (
+                    <Check className="text-green-500 size-4" />
+                  )}
+                  {(updateStatus === 'idle' || updateStatus === 'error') && (
+                    <ArrowUpCircle className="size-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {updateStatus === 'checking' && t('update.checking')}
+                {updateStatus === 'downloading' &&
+                  t('update.downloading', { version: updateVersion })}
+                {updateStatus === 'ready' && t('update.restartToUpdate')}
+                {updateStatus === 'latest' && t('update.upToDate')}
+                {updateStatus === 'error' && t('update.updateError')}
+                {updateStatus === 'idle' && t('update.checkUpdate')}
+              </TooltipContent>
+            </Tooltip>
             <LocaleSwitcher />
             <ModeToggle />
           </div>

@@ -21,3 +21,9 @@ export interface RenameEntry {
   old_name: string
   new_name: string
 }
+
+export interface BackupEntry {
+  path: string
+  created_at: string
+  profile_names: string[]
+}

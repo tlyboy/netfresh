@@ -1,4 +1,4 @@
-use crate::models::{CleanupResult, NetworkProfile, RenameEntry};
+use crate::models::{BackupEntry, CleanupResult, NetworkProfile, RenameEntry};
 use crate::network::{get_active_connections, ActiveConnection};
 use std::os::windows::process::CommandExt;
 use std::process::Command;
@@ -131,7 +131,104 @@ pub fn export_backup() -> Result<String, String> {
         ));
     }
 
+    // Save metadata sidecar
+    let profiles = read_all_profiles().unwrap_or_default();
+    let profile_names: Vec<String> = profiles.iter().map(|p| p.profile_name.clone()).collect();
+    let meta = serde_json::json!({
+        "created_at": chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string(),
+        "profile_names": profile_names,
+    });
+    let meta_path = backup_dir.join(format!("netfresh-backup-{timestamp}.json"));
+    let _ = std::fs::write(&meta_path, serde_json::to_string_pretty(&meta).unwrap_or_default());
+
     Ok(backup_str)
+}
+
+pub fn list_backups() -> Result<Vec<BackupEntry>, String> {
+    let docs = dirs_next::document_dir()
+        .or_else(dirs_next::home_dir)
+        .ok_or("Cannot find documents directory")?;
+
+    let backup_dir = docs.join("NetFresh").join("backups");
+    if !backup_dir.exists() {
+        return Ok(Vec::new());
+    }
+
+    let mut entries: Vec<BackupEntry> = std::fs::read_dir(&backup_dir)
+        .map_err(|e| format!("Failed to read backup directory: {e}"))?
+        .filter_map(|e| e.ok())
+        .filter(|e| {
+            e.path()
+                .extension()
+                .map(|ext| ext == "reg")
+                .unwrap_or(false)
+        })
+        .filter_map(|e| {
+            let reg_path = e.path();
+            let meta_path = reg_path.with_extension("json");
+
+            // Try reading metadata from JSON sidecar
+            let (created_at, profile_names) = if meta_path.exists() {
+                let content = std::fs::read_to_string(&meta_path).ok()?;
+                let meta: serde_json::Value = serde_json::from_str(&content).ok()?;
+                let created = meta["created_at"].as_str().unwrap_or("").to_string();
+                let names = meta["profile_names"]
+                    .as_array()
+                    .map(|arr| {
+                        arr.iter()
+                            .filter_map(|v| v.as_str().map(String::from))
+                            .collect()
+                    })
+                    .unwrap_or_default();
+                (created, names)
+            } else {
+                // Fallback for old backups without metadata
+                let metadata = e.metadata().ok()?;
+                let created = metadata
+                    .created()
+                    .ok()
+                    .map(|t| {
+                        let dt: chrono::DateTime<chrono::Local> = t.into();
+                        dt.format("%Y-%m-%d %H:%M:%S").to_string()
+                    })
+                    .unwrap_or_default();
+                (created, Vec::new())
+            };
+
+            Some(BackupEntry {
+                path: reg_path.to_string_lossy().to_string(),
+                created_at,
+                profile_names,
+            })
+        })
+        .collect();
+
+    entries.sort_by(|a, b| b.created_at.cmp(&a.created_at));
+    Ok(entries)
+}
+
+pub fn delete_backup(path: &str) -> Result<(), String> {
+    std::fs::remove_file(path).map_err(|e| format!("Failed to delete backup: {e}"))?;
+    let meta_path = std::path::Path::new(path).with_extension("json");
+    let _ = std::fs::remove_file(meta_path);
+    Ok(())
+}
+
+pub fn restore_backup(path: &str) -> Result<(), String> {
+    let output = Command::new("reg")
+        .args(["import", path])
+        .creation_flags(CREATE_NO_WINDOW)
+        .output()
+        .map_err(|e| format!("Failed to run reg import: {e}"))?;
+
+    if !output.status.success() {
+        return Err(format!(
+            "reg import failed: {}",
+            String::from_utf8_lossy(&output.stderr)
+        ));
+    }
+
+    Ok(())
 }
 
 fn is_auto_numbered(profile: &NetworkProfile) -> bool {

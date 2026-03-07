@@ -31,7 +31,7 @@
     "cleanup": "Cleanup + Renumber",
     "confirmTitle": "Confirm cleanup and renumber?",
     "confirmDesc": "This will delete {count} stale profiles and renumber active networks sequentially.",
-    "confirmBackup": "Registry will be backed up automatically before changes.",
+    "confirmBackup": "Registry will be backed up to Documents/NetFresh/backups automatically.",
     "execute": "Execute",
     "cancel": "Cancel",
     "staleFound": "{count} stale profiles found"
@@ -56,6 +56,26 @@
     "restartToUpdate": "Restart to update",
     "upToDate": "Up to date",
     "updateError": "Update failed"
+  },
+  "backup": {
+    "title": "Backup & Restore",
+    "description": "Backups are saved to Documents/NetFresh/backups.",
+    "createNew": "Create backup",
+    "restore": "Restore",
+    "confirmTitle": "Confirm restore?",
+    "confirmDesc": "This will restore registry to the state at {name}. Current profiles will be overwritten.",
+    "restoreSuccess": "Restored to {name}",
+    "restoreError": "Restore failed: {error}",
+    "deleteTitle": "Delete backup?",
+    "deleteDesc": "This will permanently delete the backup from {name}.",
+    "deleteSuccess": "Backup deleted",
+    "deleteError": "Delete failed: {error}",
+    "noMeta": "No profile info",
+    "empty": "No backups yet"
+  },
+  "tooltip": {
+    "refresh": "Refresh",
+    "backup": "Backup registry"
   },
   "version": "v{version}",
   "delete": {

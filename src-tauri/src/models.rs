@@ -26,3 +26,10 @@ pub struct RenameEntry {
     pub old_name: String,
     pub new_name: String,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BackupEntry {
+    pub path: String,
+    pub created_at: String,
+    pub profile_names: Vec<String>,
+}

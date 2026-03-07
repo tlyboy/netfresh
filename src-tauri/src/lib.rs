@@ -2,7 +2,7 @@ mod models;
 mod network;
 mod registry;
 
-use models::{CleanupResult, NetworkProfile};
+use models::{BackupEntry, CleanupResult, NetworkProfile};
 
 #[tauri::command]
 fn list_profiles() -> Result<Vec<NetworkProfile>, String> {
@@ -29,6 +29,21 @@ fn backup_profiles() -> Result<String, String> {
     registry::export_backup()
 }
 
+#[tauri::command]
+fn list_backups() -> Result<Vec<BackupEntry>, String> {
+    registry::list_backups()
+}
+
+#[tauri::command]
+fn restore_backup(path: String) -> Result<(), String> {
+    registry::restore_backup(&path)
+}
+
+#[tauri::command]
+fn delete_backup(path: String) -> Result<(), String> {
+    registry::delete_backup(&path)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -40,6 +55,9 @@ pub fn run() {
             rename_profile,
             delete_profile,
             backup_profiles,
+            list_backups,
+            restore_backup,
+            delete_backup,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
