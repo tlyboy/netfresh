@@ -14,11 +14,7 @@ export function LocaleSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8 cursor-pointer"
-        >
+        <Button variant="ghost" size="icon" className="size-8 cursor-pointer">
           <Languages className="size-4" />
         </Button>
       </DropdownMenuTrigger>

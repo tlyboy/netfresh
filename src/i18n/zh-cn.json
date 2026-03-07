@@ -49,6 +49,15 @@
     "deleteSuccess": "已删除: {name}",
     "deleteError": "删除失败: {error}"
   },
+  "update": {
+    "checkUpdate": "检查更新",
+    "checking": "检查中...",
+    "downloading": "下载 v{version} 中...",
+    "restartToUpdate": "重启以更新",
+    "upToDate": "已是最新",
+    "updateError": "更新失败"
+  },
+  "version": "v{version}",
   "delete": {
     "title": "确认删除配置？",
     "desc": "将删除网络配置「{name}」及其关联签名，此操作不可撤销。",

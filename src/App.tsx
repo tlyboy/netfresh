@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
+  Check,
+  Download,
   Loader2,
   RefreshCw,
   Save,
@@ -11,6 +13,7 @@ import {
   Pencil,
   Trash2,
 } from 'lucide-react'
+import { check } from '@tauri-apps/plugin-updater'
 import { toast } from 'sonner'
 
 import Default from './layouts/default'
@@ -132,6 +135,30 @@ function App() {
   const [profiles, setProfiles] = useState<NetworkProfile[]>([])
   const [loading, setLoading] = useState(true)
   const [operating, setOperating] = useState(false)
+  const [updateStatus, setUpdateStatus] = useState<
+    'idle' | 'checking' | 'downloading' | 'ready' | 'latest' | 'error'
+  >('idle')
+  const [updateVersion, setUpdateVersion] = useState('')
+
+  const handleCheckUpdate = async () => {
+    setUpdateStatus('checking')
+    try {
+      const update = await check()
+      if (update) {
+        setUpdateVersion(update.version)
+        setUpdateStatus('downloading')
+        await update.downloadAndInstall()
+        setUpdateStatus('ready')
+      } else {
+        setUpdateStatus('latest')
+        setTimeout(() => setUpdateStatus('idle'), 3000)
+      }
+    } catch (err) {
+      console.error('Update check failed:', err)
+      setUpdateStatus('error')
+      setTimeout(() => setUpdateStatus('idle'), 3000)
+    }
+  }
 
   const refresh = useCallback(async () => {
     setLoading(true)
@@ -210,6 +237,9 @@ function App() {
           <div className="flex items-center gap-2">
             <Sparkles className="text-primary size-5" />
             <h1 className="text-xl font-semibold">{t('app.title')}</h1>
+            <span className="text-muted-foreground text-xs">
+              {t('version', { version: __APP_VERSION__ })}
+            </span>
           </div>
           <div className="flex items-center gap-1.5">
             <Button
@@ -230,6 +260,50 @@ function App() {
               onClick={handleBackup}
             >
               <Save className="size-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size={
+                updateStatus === 'idle' || updateStatus === 'error'
+                  ? 'icon'
+                  : 'sm'
+              }
+              className={`h-8 cursor-pointer ${updateStatus === 'idle' || updateStatus === 'error' ? 'size-8' : ''}`}
+              onClick={
+                updateStatus === 'ready'
+                  ? () => location.reload()
+                  : handleCheckUpdate
+              }
+              disabled={
+                updateStatus === 'checking' || updateStatus === 'downloading'
+              }
+            >
+              {updateStatus === 'checking' && (
+                <>
+                  <RefreshCw className="size-4 animate-spin" />
+                  {t('update.checking')}
+                </>
+              )}
+              {updateStatus === 'downloading' && (
+                <>
+                  <Download className="size-4 animate-bounce" />
+                  {t('update.downloading', { version: updateVersion })}
+                </>
+              )}
+              {updateStatus === 'ready' && (
+                <>
+                  <RefreshCw className="size-4" />
+                  {t('update.restartToUpdate')}
+                </>
+              )}
+              {updateStatus === 'latest' && (
+                <>
+                  <Check className="size-4" />
+                  {t('update.upToDate')}
+                </>
+              )}
+              {updateStatus === 'error' && <Download className="size-4" />}
+              {updateStatus === 'idle' && <Download className="size-4" />}
             </Button>
             <LocaleSwitcher />
             <ModeToggle />

@@ -174,13 +174,20 @@ pub fn cleanup_and_renumber() -> Result<CleanupResult, String> {
         .filter(|p| p.is_active && is_auto_numbered(p))
         .collect();
 
-    // Sort by interface index from active connections
+    // Sort: local adapters first (non-virtual), then by interface index
     to_renumber.sort_by_key(|p| {
-        active
-            .iter()
-            .find(|a| a.profile_name == p.profile_name)
-            .map(|a| a.interface_index)
-            .unwrap_or(u32::MAX)
+        let conn = active.iter().find(|a| a.profile_name == p.profile_name);
+        let is_virtual = conn
+            .map(|a| {
+                let name = a.adapter_name.to_lowercase();
+                name.contains("zerotier")
+                    || name.contains("vmware")
+                    || name.contains("hyper-v")
+                    || name.contains("virtualbox")
+                    || name.contains("wsl")
+            })
+            .unwrap_or(false);
+        (is_virtual, conn.map(|a| a.interface_index).unwrap_or(u32::MAX))
     });
 
     // First pass: rename to temp names to avoid conflicts
@@ -192,7 +199,11 @@ pub fn cleanup_and_renumber() -> Result<CleanupResult, String> {
     // Second pass: rename to final names
     let mut renamed = Vec::new();
     for (i, p) in to_renumber.iter().enumerate() {
-        let new_name = format!("\u{7f51}\u{7edc} {}", i + 1); // "网络 1", "网络 2", ...
+        let new_name = if i == 0 {
+            "\u{7f51}\u{7edc}".to_string() // "网络"
+        } else {
+            format!("\u{7f51}\u{7edc} {}", i + 1) // "网络 2", "网络 3", ...
+        };
         rename_profile(&p.guid, &new_name)?;
         renamed.push(RenameEntry {
             guid: p.guid.clone(),

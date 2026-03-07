@@ -49,6 +49,15 @@
     "deleteSuccess": "Deleted: {name}",
     "deleteError": "Delete failed: {error}"
   },
+  "update": {
+    "checkUpdate": "Check for updates",
+    "checking": "Checking...",
+    "downloading": "Downloading v{version}...",
+    "restartToUpdate": "Restart to update",
+    "upToDate": "Up to date",
+    "updateError": "Update failed"
+  },
+  "version": "v{version}",
   "delete": {
     "title": "Delete profile?",
     "desc": "This will delete network profile \"{name}\" and its associated signatures. This action cannot be undone.",
