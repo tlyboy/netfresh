@@ -7,6 +7,32 @@ const CREATE_NO_WINDOW: u32 = 0x08000000;
 use winreg::enums::*;
 use winreg::RegKey;
 
+/// Detect the localized network prefix from existing profiles.
+/// e.g. "网络 2" → "网络", "Network 3" → "Network", "Netzwerk" → "Netzwerk"
+fn detect_network_prefix() -> String {
+    let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+    if let Ok(profiles_key) = hklm.open_subkey_with_flags(PROFILES_PATH, KEY_READ) {
+        for guid in profiles_key.enum_keys().filter_map(|k| k.ok()) {
+            if let Ok(sub) = profiles_key.open_subkey_with_flags(&guid, KEY_READ) {
+                let name_type: u32 = sub.get_value("NameType").unwrap_or(0);
+                if name_type == 6 {
+                    let name: String = sub.get_value("ProfileName").unwrap_or_default();
+                    // "Network 2" → "Network", "网络" → "网络", "Réseau 3" → "Réseau"
+                    if let Some(idx) = name.rfind(' ') {
+                        let (prefix, suffix) = name.split_at(idx);
+                        if suffix.trim().parse::<u32>().is_ok() {
+                            return prefix.to_string();
+                        }
+                    }
+                    // No number suffix — the name itself is the prefix (e.g. "Network", "网络")
+                    return name;
+                }
+            }
+        }
+    }
+    "Network".to_string()
+}
+
 const PROFILES_PATH: &str =
     r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles";
 const SIGNATURES_PATH: &str =
@@ -236,10 +262,11 @@ fn is_auto_numbered(profile: &NetworkProfile) -> bool {
 }
 
 fn is_network_pattern(name: &str) -> bool {
-    if name == "\u{7f51}\u{7edc}" {
-        return true; // "网络"
+    let prefix = detect_network_prefix();
+    if name == prefix {
+        return true;
     }
-    if let Some(rest) = name.strip_prefix("\u{7f51}\u{7edc} ") {
+    if let Some(rest) = name.strip_prefix(prefix.as_str()).and_then(|s| s.strip_prefix(' ')) {
         return rest.parse::<u32>().is_ok();
     }
     false
@@ -287,6 +314,9 @@ pub fn cleanup_and_renumber() -> Result<CleanupResult, String> {
         (is_virtual, conn.map(|a| a.interface_index).unwrap_or(u32::MAX))
     });
 
+    // Detect prefix before renaming to temp names
+    let prefix = detect_network_prefix();
+
     // First pass: rename to temp names to avoid conflicts
     for (i, p) in to_renumber.iter().enumerate() {
         let temp = format!("__netfresh_temp_{i}");
@@ -297,9 +327,9 @@ pub fn cleanup_and_renumber() -> Result<CleanupResult, String> {
     let mut renamed = Vec::new();
     for (i, p) in to_renumber.iter().enumerate() {
         let new_name = if i == 0 {
-            "\u{7f51}\u{7edc}".to_string() // "网络"
+            prefix.clone()
         } else {
-            format!("\u{7f51}\u{7edc} {}", i + 1) // "网络 2", "网络 3", ...
+            format!("{prefix} {}", i + 1)
         };
         rename_profile(&p.guid, &new_name)?;
         renamed.push(RenameEntry {
