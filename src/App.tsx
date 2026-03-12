@@ -286,18 +286,20 @@ function App() {
           </div>
           <div className="flex items-center gap-1">
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-8 cursor-pointer"
-                  onClick={refresh}
-                  disabled={loading}
-                >
-                  <RefreshCw
-                    className={`size-4 ${loading ? 'animate-spin' : ''}`}
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 cursor-pointer"
+                    onClick={refresh}
+                    disabled={loading}
                   />
-                </Button>
+                }
+              >
+                <RefreshCw
+                  className={`size-4 ${loading ? 'animate-spin' : ''}`}
+                />
               </TooltipTrigger>
               <TooltipContent>{t('tooltip.refresh')}</TooltipContent>
             </Tooltip>
@@ -309,25 +311,27 @@ function App() {
               }}
             >
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <SheetTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 cursor-pointer"
-                    >
-                      <Save className="size-4" />
-                    </Button>
-                  </SheetTrigger>
+                <TooltipTrigger
+                  render={
+                    <SheetTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 cursor-pointer"
+                        />
+                      }
+                    />
+                  }
+                >
+                  <Save className="size-4" />
                 </TooltipTrigger>
                 <TooltipContent>{t('tooltip.backup')}</TooltipContent>
               </Tooltip>
               <SheetContent className="flex flex-col gap-0">
                 <SheetHeader className="px-6 pb-4">
                   <SheetTitle>{t('backup.title')}</SheetTitle>
-                  <SheetDescription>
-                    {t('backup.description')}
-                  </SheetDescription>
+                  <SheetDescription>{t('backup.description')}</SheetDescription>
                 </SheetHeader>
                 <div className="border-b px-6 pb-4">
                   <Button
@@ -362,104 +366,112 @@ function App() {
                           </div>
                           <div className="flex shrink-0 items-center gap-1">
                             <Tooltip>
-                              <TooltipTrigger asChild>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="size-7 cursor-pointer"
-                                      disabled={restoring !== null}
+                              <AlertDialog>
+                                <TooltipTrigger
+                                  render={
+                                    <AlertDialogTrigger
+                                      render={
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="size-7 cursor-pointer"
+                                          disabled={restoring !== null}
+                                        />
+                                      }
+                                    />
+                                  }
+                                >
+                                  {restoring === entry.path ? (
+                                    <Loader2 className="size-3.5 animate-spin" />
+                                  ) : (
+                                    <RefreshCw className="size-3.5" />
+                                  )}
+                                </TooltipTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      {t('backup.confirmTitle')}
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      {t('backup.confirmDesc', {
+                                        name: entry.created_at,
+                                      })}
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel className="cursor-pointer">
+                                      {t('action.cancel')}
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      className="cursor-pointer"
+                                      onClick={() => handleRestore(entry)}
                                     >
-                                      {restoring === entry.path ? (
-                                        <Loader2 className="size-3.5 animate-spin" />
-                                      ) : (
-                                        <RefreshCw className="size-3.5" />
-                                      )}
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>
-                                        {t('backup.confirmTitle')}
-                                      </AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        {t('backup.confirmDesc', {
-                                          name: entry.created_at,
-                                        })}
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel className="cursor-pointer">
-                                        {t('action.cancel')}
-                                      </AlertDialogCancel>
-                                      <AlertDialogAction
-                                        className="cursor-pointer"
-                                        onClick={() => handleRestore(entry)}
-                                      >
-                                        {t('backup.restore')}
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </TooltipTrigger>
+                                      {t('backup.restore')}
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                               <TooltipContent>
                                 {t('backup.restore')}
                               </TooltipContent>
                             </Tooltip>
                             <Tooltip>
-                              <TooltipTrigger asChild>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="text-muted-foreground hover:text-destructive size-7 cursor-pointer"
+                              <AlertDialog>
+                                <TooltipTrigger
+                                  render={
+                                    <AlertDialogTrigger
+                                      render={
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="text-muted-foreground hover:text-destructive size-7 cursor-pointer"
+                                        />
+                                      }
+                                    />
+                                  }
+                                >
+                                  <Trash2 className="size-3.5" />
+                                </TooltipTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      {t('backup.deleteTitle')}
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      {t('backup.deleteDesc', {
+                                        name: entry.created_at,
+                                      })}
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel className="cursor-pointer">
+                                      {t('action.cancel')}
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90 cursor-pointer"
+                                      onClick={async () => {
+                                        try {
+                                          await deleteBackup(entry.path)
+                                          toast.success(
+                                            t('backup.deleteSuccess', {
+                                              name: entry.created_at,
+                                            }),
+                                          )
+                                          refreshBackups()
+                                        } catch (e) {
+                                          toast.error(
+                                            t('backup.deleteError', {
+                                              error: String(e),
+                                            }),
+                                          )
+                                        }
+                                      }}
                                     >
-                                      <Trash2 className="size-3.5" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>
-                                        {t('backup.deleteTitle')}
-                                      </AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        {t('backup.deleteDesc', {
-                                          name: entry.created_at,
-                                        })}
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel className="cursor-pointer">
-                                        {t('action.cancel')}
-                                      </AlertDialogCancel>
-                                      <AlertDialogAction
-                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90 cursor-pointer"
-                                        onClick={async () => {
-                                          try {
-                                            await deleteBackup(entry.path)
-                                            toast.success(
-                                              t('backup.deleteSuccess', {
-                                                name: entry.created_at,
-                                              }),
-                                            )
-                                            refreshBackups()
-                                          } catch (e) {
-                                            toast.error(
-                                              t('backup.deleteError', {
-                                                error: String(e),
-                                              }),
-                                            )
-                                          }
-                                        }}
-                                      >
-                                        {t('delete.confirm')}
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </TooltipTrigger>
+                                      {t('delete.confirm')}
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                               <TooltipContent>
                                 {t('delete.confirm')}
                               </TooltipContent>
@@ -479,37 +491,39 @@ function App() {
               </SheetContent>
             </Sheet>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-8 cursor-pointer"
-                  onClick={
-                    updateStatus === 'ready'
-                      ? () => location.reload()
-                      : handleCheckUpdate
-                  }
-                  disabled={
-                    updateStatus === 'checking' ||
-                    updateStatus === 'downloading'
-                  }
-                >
-                  {updateStatus === 'checking' && (
-                    <RefreshCw className="size-4 animate-spin" />
-                  )}
-                  {updateStatus === 'downloading' && (
-                    <Download className="size-4 animate-bounce" />
-                  )}
-                  {updateStatus === 'ready' && (
-                    <ArrowUpCircle className="text-green-500 size-4" />
-                  )}
-                  {updateStatus === 'latest' && (
-                    <Check className="text-green-500 size-4" />
-                  )}
-                  {(updateStatus === 'idle' || updateStatus === 'error') && (
-                    <ArrowUpCircle className="size-4" />
-                  )}
-                </Button>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 cursor-pointer"
+                    onClick={
+                      updateStatus === 'ready'
+                        ? () => location.reload()
+                        : handleCheckUpdate
+                    }
+                    disabled={
+                      updateStatus === 'checking' ||
+                      updateStatus === 'downloading'
+                    }
+                  />
+                }
+              >
+                {updateStatus === 'checking' && (
+                  <RefreshCw className="size-4 animate-spin" />
+                )}
+                {updateStatus === 'downloading' && (
+                  <Download className="size-4 animate-bounce" />
+                )}
+                {updateStatus === 'ready' && (
+                  <ArrowUpCircle className="size-4 text-green-500" />
+                )}
+                {updateStatus === 'latest' && (
+                  <Check className="size-4 text-green-500" />
+                )}
+                {(updateStatus === 'idle' || updateStatus === 'error') && (
+                  <ArrowUpCircle className="size-4" />
+                )}
               </TooltipTrigger>
               <TooltipContent>
                 {updateStatus === 'checking' && t('update.checking')}
@@ -548,14 +562,16 @@ function App() {
         {/* Action */}
         <div className="flex items-center gap-2">
           <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                className="cursor-pointer"
-                disabled={operating || loading}
-              >
-                {operating && <Loader2 className="size-4 animate-spin" />}
-                {t('action.cleanup')}
-              </Button>
+            <AlertDialogTrigger
+              render={
+                <Button
+                  className="cursor-pointer"
+                  disabled={operating || loading}
+                />
+              }
+            >
+              {operating && <Loader2 className="size-4 animate-spin" />}
+              {t('action.cleanup')}
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -636,14 +652,16 @@ function App() {
                   </TableCell>
                   <TableCell>
                     <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-muted-foreground hover:text-destructive size-7 cursor-pointer"
-                        >
-                          <Trash2 className="size-3.5" />
-                        </Button>
+                      <AlertDialogTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-muted-foreground hover:text-destructive size-7 cursor-pointer"
+                          />
+                        }
+                      >
+                        <Trash2 className="size-3.5" />
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
