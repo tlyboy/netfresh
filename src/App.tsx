@@ -118,7 +118,7 @@ function EditableName({
     return (
       <input
         ref={inputRef}
-        className="border-input bg-background focus:ring-ring h-7 w-32 rounded border px-2 text-sm outline-none focus:ring-1"
+        className="h-7 w-32 rounded border border-input bg-background px-2 text-sm outline-none focus:ring-1 focus:ring-ring"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={(e) => {
@@ -143,7 +143,7 @@ function EditableName({
       }}
     >
       {profile.profile_name}
-      <Pencil className="text-muted-foreground size-3 opacity-0 group-hover:opacity-100" />
+      <Pencil className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100" />
     </span>
   )
 }
@@ -278,9 +278,9 @@ function App() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles className="text-primary size-5" />
+            <Sparkles className="size-5 text-primary" />
             <h1 className="text-xl font-semibold">{t('app.title')}</h1>
-            <span className="text-muted-foreground text-xs">
+            <span className="text-xs text-muted-foreground">
               {t('version', { version: __APP_VERSION__ })}
             </span>
           </div>
@@ -340,12 +340,12 @@ function App() {
                   </Button>
                 </div>
                 <ScrollArea className="flex-1 px-6">
-                  <div className="divide-border divide-y">
+                  <div className="divide-y divide-border">
                     {backups.map((entry) => (
                       <div key={entry.path} className="py-3">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0 flex-1">
-                            <p className="text-muted-foreground text-xs">
+                            <p className="text-xs text-muted-foreground">
                               {entry.created_at}
                             </p>
                             {entry.profile_names.length > 0 ? (
@@ -353,7 +353,7 @@ function App() {
                                 {entry.profile_names.join(', ')}
                               </p>
                             ) : (
-                              <p className="text-muted-foreground mt-0.5 text-sm italic">
+                              <p className="mt-0.5 text-sm text-muted-foreground italic">
                                 {t('backup.noMeta')}
                               </p>
                             )}
@@ -412,7 +412,7 @@ function App() {
                                     <Button
                                       variant="ghost"
                                       size="icon"
-                                      className="text-muted-foreground hover:text-destructive size-7 cursor-pointer"
+                                      className="size-7 cursor-pointer text-muted-foreground hover:text-destructive"
                                     >
                                       <Trash2 className="size-3.5" />
                                     </Button>
@@ -434,7 +434,7 @@ function App() {
                                       {t('action.cancel')}
                                     </AlertDialogCancel>
                                     <AlertDialogAction
-                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90 cursor-pointer"
+                                      className="text-destructive-foreground cursor-pointer bg-destructive hover:bg-destructive/90"
                                       onClick={async () => {
                                         try {
                                           await deleteBackup(entry.path)
@@ -467,7 +467,7 @@ function App() {
                       </div>
                     ))}
                     {backups.length === 0 && (
-                      <div className="text-muted-foreground flex flex-col items-center gap-2 py-12 text-sm">
+                      <div className="flex flex-col items-center gap-2 py-12 text-sm text-muted-foreground">
                         <Save className="size-8 opacity-20" />
                         {t('backup.empty')}
                       </div>
@@ -529,12 +529,12 @@ function App() {
           {stats.map((stat) => (
             <Card key={stat.labelKey} className="py-3">
               <CardContent className="flex items-center gap-3 px-4">
-                <stat.icon className="text-muted-foreground size-4" />
+                <stat.icon className="size-4 text-muted-foreground" />
                 <div>
                   <p className="text-2xl leading-none font-semibold">
                     {stat.value}
                   </p>
-                  <p className="text-muted-foreground mt-1 text-xs">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     {t(stat.labelKey)}
                   </p>
                 </div>
@@ -578,7 +578,7 @@ function App() {
             </AlertDialogContent>
           </AlertDialog>
           {staleCount > 0 && (
-            <span className="text-muted-foreground text-sm">
+            <span className="text-sm text-muted-foreground">
               {t('action.staleFound', { count: staleCount })}
             </span>
           )}
@@ -629,7 +629,7 @@ function App() {
                   <TableCell className="text-muted-foreground">
                     {profile.adapter_name ?? '-'}
                   </TableCell>
-                  <TableCell className="text-muted-foreground font-mono">
+                  <TableCell className="font-mono text-muted-foreground">
                     {profile.ip_address ?? '-'}
                   </TableCell>
                   <TableCell>
@@ -638,7 +638,7 @@ function App() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="text-muted-foreground hover:text-destructive size-7 cursor-pointer"
+                          className="size-7 cursor-pointer text-muted-foreground hover:text-destructive"
                         >
                           <Trash2 className="size-3.5" />
                         </Button>
@@ -659,7 +659,7 @@ function App() {
                             {t('delete.cancel')}
                           </AlertDialogCancel>
                           <AlertDialogAction
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 cursor-pointer"
+                            className="text-destructive-foreground cursor-pointer bg-destructive hover:bg-destructive/90"
                             onClick={async () => {
                               try {
                                 await deleteProfile(profile.guid)
@@ -690,7 +690,7 @@ function App() {
                 <TableRow>
                   <TableCell
                     colSpan={6}
-                    className="text-muted-foreground h-24 text-center"
+                    className="h-24 text-center text-muted-foreground"
                   >
                     {t('table.empty')}
                   </TableCell>
