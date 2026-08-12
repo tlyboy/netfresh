@@ -3,19 +3,13 @@ import { flushSync } from 'react-dom'
 import { Button } from './ui/button'
 
 export function ModeToggle() {
-  const { theme, setTheme } = useTheme()
+  const { resolvedTheme, setTheme } = useTheme()
 
   function toggleDark(event: React.MouseEvent<HTMLButtonElement>) {
     const isAppearanceTransition =
       typeof document.startViewTransition === 'function' &&
       !window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-    const resolvedTheme =
-      theme === 'system'
-        ? window.matchMedia('(prefers-color-scheme: dark)').matches
-          ? 'dark'
-          : 'light'
-        : theme
     const newTheme = resolvedTheme === 'dark' ? 'light' : 'dark'
 
     if (!isAppearanceTransition) {
@@ -23,8 +17,8 @@ export function ModeToggle() {
       return
     }
 
-    // For keyboard- or programmatically triggered clicks, detail, clientX, and clientY are all 0,
-    // so using them directly puts the circle center at the top-left of the viewport. Fall back to the button center.
+    // For keyboard- or programmatically triggered clicks, detail is 0 and clientX/Y are also 0,
+    // so using them directly puts the circle's center at the top-left of the viewport. Fall back to the button center.
     // React clears currentTarget after the handler returns, so read it synchronously.
     let x = event.clientX
     let y = event.clientY
@@ -34,9 +28,9 @@ export function ModeToggle() {
       y = rect.top + rect.height / 2
     }
 
-    // Always use percentages for the center and radius, not pixels. The contents of ::view-transition-old/new(root) are
-    // snapshots at devicePixelRatio scale. Pixel lengths are resolved against the snapshot size, then scaled back to the viewport; at dPR=2, coordinates
-    // are halved, the center shifts toward the top-left, and the radius no longer covers the whole screen. Percentages are resolved against the pseudo-element's own box and are unaffected.
+    // Use percentages, not pixels, for both the center and radius. The content of ::view-transition-old/new(root) is
+    // a snapshot at devicePixelRatio scale. Pixel lengths are resolved against the snapshot dimensions and then scaled back to the viewport; at dPR=2, coordinates
+    // are halved, the center shifts toward the top-left, and the radius no longer covers the screen. Percentages are resolved relative to the pseudo-element's own box, so they're unaffected.
     const cx = (x / window.innerWidth) * 100
     const cy = (y / window.innerHeight) * 100
     // The percentage radius of circle() is based on sqrt(w² + h²) / sqrt(2)
@@ -52,8 +46,8 @@ export function ModeToggle() {
 
     const transition = document.startViewTransition(() => {
       // setTheme only calls setState; the code that actually writes the class is in useEffect. Without flushSync,
-      // the DOM still has the old theme when the callback returns, so the old and new snapshots are identical and the animation effectively does not run. If CSS uses .dark
-      // to switch z-index, the delayed class update can also leave the animated layer underneath, completely covered.
+      // the DOM still has the old theme when the callback returns, so the old and new snapshots are identical and the animation effectively doesn't run. If CSS uses .dark
+      // to switch z-index, the delayed class update also causes the animated layer to end up underneath and be completely covered.
       flushSync(() => setTheme(newTheme))
     })
 
@@ -77,12 +71,12 @@ export function ModeToggle() {
                 : '::view-transition-new(root)',
           },
         )
-        // An animation with fill: 'forwards' doesn't disappear when it ends; it stays attached to documentElement.
-        // One accumulates on each switch, and the same-named pseudo-element in the next transition keeps having its clip-path set by the previous leftover animation.
+        // After the animation ends, fill: 'forwards' doesn't disappear on its own; it stays attached to documentElement.
+        // Each toggle adds another one, and a leftover same-named pseudo-element from the previous transition keeps setting clip-path during the next one.
         void transition.finished.finally(() => animation.cancel())
       })
-      // If the transition is interrupted (rapid clicks, route change), ready rejects with InvalidStateError.
-      // The theme has already switched, so catch must be attached after then to catch the derived chain.
+      // If the transition is interrupted (rapid clicks, route changes), ready rejects with InvalidStateError.
+      // The theme has already changed, so catch must be attached after then to catch the resulting chained rejection.
       .catch(() => {})
   }
 
