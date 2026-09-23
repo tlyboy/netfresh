@@ -286,18 +286,20 @@ function App() {
           </div>
           <div className="flex items-center gap-1">
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-8 cursor-pointer"
-                  onClick={refresh}
-                  disabled={loading}
-                >
-                  <RefreshCw
-                    className={`size-4 ${loading ? 'animate-spin' : ''}`}
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 cursor-pointer"
+                    onClick={refresh}
+                    disabled={loading}
                   />
-                </Button>
+                }
+              >
+                <RefreshCw
+                  className={`size-4 ${loading ? 'animate-spin' : ''}`}
+                />
               </TooltipTrigger>
               <TooltipContent>{t('tooltip.refresh')}</TooltipContent>
             </Tooltip>
@@ -309,16 +311,20 @@ function App() {
               }}
             >
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <SheetTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 cursor-pointer"
-                    >
-                      <Save className="size-4" />
-                    </Button>
-                  </SheetTrigger>
+                <TooltipTrigger
+                  render={
+                    <SheetTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 cursor-pointer"
+                        />
+                      }
+                    />
+                  }
+                >
+                  <Save className="size-4" />
                 </TooltipTrigger>
                 <TooltipContent>{t('tooltip.backup')}</TooltipContent>
               </Tooltip>
@@ -361,21 +367,25 @@ function App() {
                           <div className="flex shrink-0 items-center gap-1">
                             <Tooltip>
                               <AlertDialog>
-                                <TooltipTrigger asChild>
-                                  <AlertDialogTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="size-7 cursor-pointer"
-                                      disabled={restoring !== null}
-                                    >
-                                      {restoring === entry.path ? (
-                                        <Loader2 className="size-3.5 animate-spin" />
-                                      ) : (
-                                        <RefreshCw className="size-3.5" />
-                                      )}
-                                    </Button>
-                                  </AlertDialogTrigger>
+                                <TooltipTrigger
+                                  render={
+                                    <AlertDialogTrigger
+                                      render={
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="size-7 cursor-pointer"
+                                          disabled={restoring !== null}
+                                        />
+                                      }
+                                    />
+                                  }
+                                >
+                                  {restoring === entry.path ? (
+                                    <Loader2 className="size-3.5 animate-spin" />
+                                  ) : (
+                                    <RefreshCw className="size-3.5" />
+                                  )}
                                 </TooltipTrigger>
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
@@ -407,16 +417,20 @@ function App() {
                             </Tooltip>
                             <Tooltip>
                               <AlertDialog>
-                                <TooltipTrigger asChild>
-                                  <AlertDialogTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="size-7 cursor-pointer text-muted-foreground hover:text-destructive"
-                                    >
-                                      <Trash2 className="size-3.5" />
-                                    </Button>
-                                  </AlertDialogTrigger>
+                                <TooltipTrigger
+                                  render={
+                                    <AlertDialogTrigger
+                                      render={
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="size-7 cursor-pointer text-muted-foreground hover:text-destructive"
+                                        />
+                                      }
+                                    />
+                                  }
+                                >
+                                  <Trash2 className="size-3.5" />
                                 </TooltipTrigger>
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
@@ -477,37 +491,39 @@ function App() {
               </SheetContent>
             </Sheet>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-8 cursor-pointer"
-                  onClick={
-                    updateStatus === 'ready'
-                      ? () => location.reload()
-                      : handleCheckUpdate
-                  }
-                  disabled={
-                    updateStatus === 'checking' ||
-                    updateStatus === 'downloading'
-                  }
-                >
-                  {updateStatus === 'checking' && (
-                    <RefreshCw className="size-4 animate-spin" />
-                  )}
-                  {updateStatus === 'downloading' && (
-                    <Download className="size-4 animate-bounce" />
-                  )}
-                  {updateStatus === 'ready' && (
-                    <ArrowUpCircle className="size-4 text-green-500" />
-                  )}
-                  {updateStatus === 'latest' && (
-                    <Check className="size-4 text-green-500" />
-                  )}
-                  {(updateStatus === 'idle' || updateStatus === 'error') && (
-                    <ArrowUpCircle className="size-4" />
-                  )}
-                </Button>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 cursor-pointer"
+                    onClick={
+                      updateStatus === 'ready'
+                        ? () => location.reload()
+                        : handleCheckUpdate
+                    }
+                    disabled={
+                      updateStatus === 'checking' ||
+                      updateStatus === 'downloading'
+                    }
+                  />
+                }
+              >
+                {updateStatus === 'checking' && (
+                  <RefreshCw className="size-4 animate-spin" />
+                )}
+                {updateStatus === 'downloading' && (
+                  <Download className="size-4 animate-bounce" />
+                )}
+                {updateStatus === 'ready' && (
+                  <ArrowUpCircle className="size-4 text-green-500" />
+                )}
+                {updateStatus === 'latest' && (
+                  <Check className="size-4 text-green-500" />
+                )}
+                {(updateStatus === 'idle' || updateStatus === 'error') && (
+                  <ArrowUpCircle className="size-4" />
+                )}
               </TooltipTrigger>
               <TooltipContent>
                 {updateStatus === 'checking' && t('update.checking')}
@@ -546,14 +562,16 @@ function App() {
         {/* Action */}
         <div className="flex items-center gap-2">
           <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                className="cursor-pointer"
-                disabled={operating || loading}
-              >
-                {operating && <Loader2 className="size-4 animate-spin" />}
-                {t('action.cleanup')}
-              </Button>
+            <AlertDialogTrigger
+              render={
+                <Button
+                  className="cursor-pointer"
+                  disabled={operating || loading}
+                />
+              }
+            >
+              {operating && <Loader2 className="size-4 animate-spin" />}
+              {t('action.cleanup')}
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -634,14 +652,16 @@ function App() {
                   </TableCell>
                   <TableCell>
                     <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-7 cursor-pointer text-muted-foreground hover:text-destructive"
-                        >
-                          <Trash2 className="size-3.5" />
-                        </Button>
+                      <AlertDialogTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-7 cursor-pointer text-muted-foreground hover:text-destructive"
+                          />
+                        }
+                      >
+                        <Trash2 className="size-3.5" />
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
