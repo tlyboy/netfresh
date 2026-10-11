@@ -23,11 +23,7 @@ import { LocaleSwitcher } from '@/components/locale-switcher'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   Table,
   TableBody,
@@ -83,13 +79,7 @@ const categoryVariants: Record<number, 'outline' | 'secondary'> = {
   2: 'secondary',
 }
 
-function EditableName({
-  profile,
-  onSaved,
-}: {
-  profile: NetworkProfile
-  onSaved: () => void
-}) {
+function EditableName({ profile, onSaved }: { profile: NetworkProfile; onSaved: () => void }) {
   const t = useTranslations()
   const [editing, setEditing] = useState(false)
   const [value, setValue] = useState(profile.profile_name)
@@ -104,9 +94,7 @@ function EditableName({
     }
     try {
       await renameProfile(profile.guid, trimmed)
-      toast.success(
-        t('toast.renameSuccess', { from: profile.profile_name, to: trimmed }),
-      )
+      toast.success(t('toast.renameSuccess', { from: profile.profile_name, to: trimmed }))
       setEditing(false)
       onSaved()
     } catch (e) {
@@ -260,9 +248,7 @@ function App() {
   }
 
   const activeCount = profiles.filter((p) => p.is_active).length
-  const staleCount = profiles.filter(
-    (p) => !p.is_active && p.is_auto_numbered,
-  ).length
+  const staleCount = profiles.filter((p) => !p.is_active && p.is_auto_numbered).length
   const customCount = profiles.filter((p) => !p.is_auto_numbered).length
 
   const stats = [
@@ -297,9 +283,7 @@ function App() {
                   />
                 }
               >
-                <RefreshCw
-                  className={`size-4 ${loading ? 'animate-spin' : ''}`}
-                />
+                <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
               </TooltipTrigger>
               <TooltipContent>{t('tooltip.refresh')}</TooltipContent>
             </Tooltip>
@@ -315,11 +299,7 @@ function App() {
                   render={
                     <SheetTrigger
                       render={
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8 cursor-pointer"
-                        />
+                        <Button variant="ghost" size="icon" className="size-8 cursor-pointer" />
                       }
                     />
                   }
@@ -351,13 +331,9 @@ function App() {
                       <div key={entry.path} className="py-3">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0 flex-1">
-                            <p className="text-xs text-muted-foreground">
-                              {entry.created_at}
-                            </p>
+                            <p className="text-xs text-muted-foreground">{entry.created_at}</p>
                             {entry.profile_names.length > 0 ? (
-                              <p className="mt-0.5 text-sm">
-                                {entry.profile_names.join(', ')}
-                              </p>
+                              <p className="mt-0.5 text-sm">{entry.profile_names.join(', ')}</p>
                             ) : (
                               <p className="mt-0.5 text-sm text-muted-foreground italic">
                                 {t('backup.noMeta')}
@@ -389,9 +365,7 @@ function App() {
                                 </TooltipTrigger>
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
-                                    <AlertDialogTitle>
-                                      {t('backup.confirmTitle')}
-                                    </AlertDialogTitle>
+                                    <AlertDialogTitle>{t('backup.confirmTitle')}</AlertDialogTitle>
                                     <AlertDialogDescription>
                                       {t('backup.confirmDesc', {
                                         name: entry.created_at,
@@ -411,9 +385,7 @@ function App() {
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
                               </AlertDialog>
-                              <TooltipContent>
-                                {t('backup.restore')}
-                              </TooltipContent>
+                              <TooltipContent>{t('backup.restore')}</TooltipContent>
                             </Tooltip>
                             <Tooltip>
                               <AlertDialog>
@@ -434,9 +406,7 @@ function App() {
                                 </TooltipTrigger>
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
-                                    <AlertDialogTitle>
-                                      {t('backup.deleteTitle')}
-                                    </AlertDialogTitle>
+                                    <AlertDialogTitle>{t('backup.deleteTitle')}</AlertDialogTitle>
                                     <AlertDialogDescription>
                                       {t('backup.deleteDesc', {
                                         name: entry.created_at,
@@ -472,9 +442,7 @@ function App() {
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
                               </AlertDialog>
-                              <TooltipContent>
-                                {t('delete.confirm')}
-                              </TooltipContent>
+                              <TooltipContent>{t('delete.confirm')}</TooltipContent>
                             </Tooltip>
                           </div>
                         </div>
@@ -497,30 +465,15 @@ function App() {
                     variant="ghost"
                     size="icon"
                     className="size-8 cursor-pointer"
-                    onClick={
-                      updateStatus === 'ready'
-                        ? () => location.reload()
-                        : handleCheckUpdate
-                    }
-                    disabled={
-                      updateStatus === 'checking' ||
-                      updateStatus === 'downloading'
-                    }
+                    onClick={updateStatus === 'ready' ? () => location.reload() : handleCheckUpdate}
+                    disabled={updateStatus === 'checking' || updateStatus === 'downloading'}
                   />
                 }
               >
-                {updateStatus === 'checking' && (
-                  <RefreshCw className="size-4 animate-spin" />
-                )}
-                {updateStatus === 'downloading' && (
-                  <Download className="size-4 animate-bounce" />
-                )}
-                {updateStatus === 'ready' && (
-                  <ArrowUpCircle className="size-4 text-green-500" />
-                )}
-                {updateStatus === 'latest' && (
-                  <Check className="size-4 text-green-500" />
-                )}
+                {updateStatus === 'checking' && <RefreshCw className="size-4 animate-spin" />}
+                {updateStatus === 'downloading' && <Download className="size-4 animate-bounce" />}
+                {updateStatus === 'ready' && <ArrowUpCircle className="size-4 text-green-500" />}
+                {updateStatus === 'latest' && <Check className="size-4 text-green-500" />}
                 {(updateStatus === 'idle' || updateStatus === 'error') && (
                   <ArrowUpCircle className="size-4" />
                 )}
@@ -547,12 +500,8 @@ function App() {
               <CardContent className="flex items-center gap-3 px-4">
                 <stat.icon className="size-4 text-muted-foreground" />
                 <div>
-                  <p className="text-2xl leading-none font-semibold">
-                    {stat.value}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {t(stat.labelKey)}
-                  </p>
+                  <p className="text-2xl leading-none font-semibold">{stat.value}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{t(stat.labelKey)}</p>
                 </div>
               </CardContent>
             </Card>
@@ -563,12 +512,7 @@ function App() {
         <div className="flex items-center gap-2">
           <AlertDialog>
             <AlertDialogTrigger
-              render={
-                <Button
-                  className="cursor-pointer"
-                  disabled={operating || loading}
-                />
-              }
+              render={<Button className="cursor-pointer" disabled={operating || loading} />}
             >
               {operating && <Loader2 className="size-4 animate-spin" />}
               {t('action.cleanup')}
@@ -586,10 +530,7 @@ function App() {
                 <AlertDialogCancel className="cursor-pointer">
                   {t('action.cancel')}
                 </AlertDialogCancel>
-                <AlertDialogAction
-                  className="cursor-pointer"
-                  onClick={handleCleanup}
-                >
+                <AlertDialogAction className="cursor-pointer" onClick={handleCleanup}>
                   {t('action.execute')}
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -617,18 +558,12 @@ function App() {
             </TableHeader>
             <TableBody>
               {profiles.map((profile) => (
-                <TableRow
-                  key={profile.guid}
-                  className={!profile.is_active ? 'opacity-50' : ''}
-                >
+                <TableRow key={profile.guid} className={!profile.is_active ? 'opacity-50' : ''}>
                   <TableCell className="font-medium">
                     <EditableName profile={profile} onSaved={refresh} />
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      variant={profile.is_active ? 'default' : 'outline'}
-                      className="text-xs"
-                    >
+                    <Badge variant={profile.is_active ? 'default' : 'outline'} className="text-xs">
                       {profile.is_active
                         ? t('status.active')
                         : profile.is_auto_numbered
@@ -665,9 +600,7 @@ function App() {
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            {t('delete.title')}
-                          </AlertDialogTitle>
+                          <AlertDialogTitle>{t('delete.title')}</AlertDialogTitle>
                           <AlertDialogDescription>
                             {t('delete.desc', {
                               name: profile.profile_name,
@@ -708,10 +641,7 @@ function App() {
               ))}
               {profiles.length === 0 && !loading && (
                 <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    className="h-24 text-center text-muted-foreground"
-                  >
+                  <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
                     {t('table.empty')}
                   </TableCell>
                 </TableRow>
