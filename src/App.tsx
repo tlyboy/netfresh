@@ -123,7 +123,8 @@ function EditableName({ profile, onSaved }: { profile: NetworkProfile; onSaved: 
   }
 
   return (
-    <span
+    <button
+      type="button"
       className="group inline-flex cursor-pointer items-center gap-1"
       onClick={() => {
         setEditing(true)
@@ -132,7 +133,7 @@ function EditableName({ profile, onSaved }: { profile: NetworkProfile; onSaved: 
     >
       {profile.profile_name}
       <Pencil className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100" />
-    </span>
+    </button>
   )
 }
 
