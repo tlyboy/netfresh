@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc"],
+  "categories": { "correctness": "error" },
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+  },
+  "ignorePatterns": ["dist", "src-tauri/target"],
+  "overrides": [
+    {
+      // Keep components pulled from shadcn as-is; don't change them just to satisfy lint.
+      // Exporting buttonVariants from ui/** and exporting useTheme from theme-provider are both
+      // standard shadcn patterns. This rule only affects HMR granularity and isn't a defect.
+      // allowConstantExport covers neither one: cva() is a call, and useTheme is a hook.
+      "files": ["src/components/ui/**", "src/components/theme-provider.tsx"],
+      "rules": { "react/only-export-components": "off" }
+    }
+  ]
+}
